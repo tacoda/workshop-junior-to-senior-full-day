@@ -51,22 +51,23 @@ Six hours of active time, split by lunch (which doesn't count). Breaks included.
 |---|---|---|
 | 0:00 | 25 | Welcome, the frame, and the comprehension card |
 | 0:25 | 20 | Ports and adapters in 60 seconds; read the app |
-| 0:45 | 40 | **Module 1** — Comprehension: read the drift |
-| 1:25 | 10 | Break |
-| 1:35 | 35 | **Module 2** — Watch the drift compound (the agent imitates the code) |
-| 2:10 | 25 | **Module 3** — Rules at depth (feedforward; the specificity knob) |
+| 0:45 | 35 | **Module 1** — Comprehension: read the drift |
+| 1:20 | 10 | Break |
+| 1:30 | 30 | **Module 2** — Watch the drift compound (the agent imitates the code) |
+| 2:00 | 25 | **Module 3** — Rules at depth (feedforward; the specificity knob) |
 | — | — | **Lunch — does not count toward the six hours** |
-| 2:35 | 40 | **Module 4** — The refactor: fix the code to match the rule (hands-on) |
-| 3:15 | 30 | **Module 5** — Hooks at depth (feedback; the position knob) |
-| 3:45 | 10 | Break |
-| 3:55 | 30 | **Module 6** — Commands (build-it lab) |
-| 4:25 | 30 | **Module 7** — Skills (build-it lab) |
-| 4:55 | 35 | **Module 8** — Agents (build-it lab) and planning with `/plan` |
-| 5:30 | 15 | **Module 9** — The bigger picture: surfaces and mechanisms |
-| 5:45 | 15 | **Module 10** — Mindset, strategies, pairing with a senior |
+| 2:25 | 40 | **Module 4** — The refactor: fix the code to match the rule (hands-on) |
+| 3:05 | 30 | **Module 5** — Hooks at depth (feedback; the position knob) |
+| 3:35 | 10 | Break |
+| 3:45 | 30 | **Module 6** — Commands (build-it lab) |
+| 4:15 | 30 | **Module 7** — Skills (build-it lab) |
+| 4:45 | 30 | **Module 8** — Agents (build-it lab) |
+| 5:15 | 15 | **Module 9** — Context and continuity: the charter file, memory, planning |
+| 5:30 | 15 | **Module 10** — The bigger picture: surfaces and mechanisms |
+| 5:45 | 15 | **Module 11** — Mindset, strategies, pairing with a senior |
 | 6:00 | — | **Open Q&A** to the end of the session |
 
-Tight on time? Safe cuts, in order: Module 9 → the second half of Module 3 → shrink the talk. Never
+Tight on time? Safe cuts, in order: Module 10 → the second half of Module 3 → shrink the talk. Never
 cut Modules 1, 2, and 4 — the read, the compound, and the fix are the arc.
 
 ---
@@ -379,7 +380,39 @@ design, and never the discount path.
 **Delegation's own trap:** an agent runs on its own comprehension, not yours. You still own the verdict.
 Read what it returns with the same five questions — a confident subagent can be confidently wrong.
 
-### Planning with `/plan`
+---
+
+## Module 9 · Context and continuity — the charter file, memory, and planning
+
+The five mechanisms decide what the agent *does*. This module is about what the agent *knows going in* and
+*where it's headed* — the context layer underneath. Three primitives, and the discipline of each.
+
+### The charter file — `CLAUDE.md` / `AGENTS.md`
+
+The top-of-context project instructions, **read at the start of every session, always on.** This is the file
+that carries the seed's ports-and-adapters rule; it's the "instruction" surface at the base of the bigger
+picture. `CLAUDE.md` is Claude Code's filename; **`AGENTS.md`** is the cross-tool convention a growing number
+of agents now read — same idea, portable name. Two disciplines:
+
+- **Keep it small.** It costs context on every single turn, so it earns its place only with the invariants
+  that truly always apply. Deep, situational guidance belongs in a *skill* (Module 7), not here.
+- **Keep it true.** A charter the code contradicts is the drift you spent all morning on. The file is a
+  promise about the code; when they disagree, the code wins — so fix the code, don't just edit the file.
+
+### Memory — what persists across sessions
+
+A session ends and its context is gone. **Memory** is the small store that survives: the facts you don't want
+to re-derive every time — a decision and *why* it was made, a constraint that isn't visible in the code, a
+preference the team holds. It's distinct from the charter: the charter is the standing *rules* for the repo;
+memory is *accrued knowledge* about it ("we chose integer cents because floats bit us," "this service must
+never call out to X"). Two disciplines:
+
+- **Write the non-obvious *why*, not what the repo already records.** The code, the tests, and the git history
+  are already memory of a kind. Save what none of them capture — the reasoning behind a choice.
+- **Distrust stale memory.** A fact was true when written; code moves. A remembered filename or flag can rot.
+  Verify it still exists before you act on it — the same five questions apply to a memory as to a diff.
+
+### Planning — `/plan`
 
 Before a change with more than a couple of moving parts — the Module 4 refactor is the perfect example —
 reach for a planning step. In Claude Code, `/plan` (the planning skill) breaks work into small, ordered,
@@ -388,9 +421,12 @@ executes against a plan you understood. The senior habit isn't "prompt and pray"
 plan → execute in small steps → check each.** For the refactor, a good plan is literally the five steps in
 Module 4, each with "run pytest" as its check. Plan first when the blast radius is more than one file.
 
+Charter, memory, plan: the standing rules, the accrued facts, and the path for *this* change. Get them right
+and every mechanism above works from good context; get them wrong and the sharpest hook is guarding garbage.
+
 ---
 
-## Module 9 · The bigger picture — surfaces and mechanisms
+## Module 10 · The bigger picture — surfaces and mechanisms
 
 Step back. Everything today was about **bounding what an agent does** and **spending your attention where
 it counts.** Two families: three *surfaces* that bound behavior, and five *mechanisms* that direct the work
@@ -430,7 +466,7 @@ of all.
 
 ---
 
-## Module 10 · Mindset, strategies, and pairing with a senior
+## Module 11 · Mindset, strategies, and pairing with a senior
 
 The tools were the morning. This is the part that actually makes you senior.
 
@@ -534,12 +570,12 @@ Source and docs: [sqlite.org](https://www.sqlite.org/) · source at [sqlite.org/
 ## Running the session
 
 The day is an arc: **read the drift (M1) → watch it compound (M2) → fix it (M4) → lock it in (M5) → learn
-the rest of the toolkit (M6–M8) → step back (M9–M10).** M4 is the emotional peak — the moment a learner turns
+the rest of the toolkit (M6–M8) → context and continuity (M9) → step back (M10–M11).** M4 is the emotional peak — the moment a learner turns
 tangled code into a clean hexagon by hand and re-runs the agent to see it now do the right thing. Protect it.
 
 - **Pre-flight is non-negotiable.** Put the *Before you start* block in the invite and on the opening slide.
   `pytest` **and** the AI tool must be green before the room starts. Anyone red pairs with someone green.
-- **Cut talk before lab.** If you run long, shrink M9 and the talk; never M1/M2/M4.
+- **Cut talk before lab.** If you run long, shrink M10 and the talk; never M1/M2/M4.
 - **Protect the discovery.** Don't pre-spoil "green ≠ design." Let M1 land it and M2 sting.
 - **Regroup on the compound.** The live M2 run is *variable* — on a repo this small a capable agent often
   complies and builds the port. Don't fight it: when it complies, say *"good — and notice it took a strong
