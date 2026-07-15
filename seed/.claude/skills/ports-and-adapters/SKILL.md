@@ -28,8 +28,20 @@ Concrete adapters are constructed only in `main.py`.
 3. **Inject it.** Take the port in `CheckoutService.__init__` and use it through the interface.
 4. **Wire it.** Construct the concrete adapter in `main.py` only, and pass it in.
 
+## Verify — run the bundled checker
+This skill ships a checker. After you add or refactor, run it and paste the result:
+
+```bash
+python "$CLAUDE_PROJECT_DIR/.claude/skills/ports-and-adapters/check_architecture.py" checkout
+```
+
+It scans the domain files and fails (exit 1) if any imports a concrete adapter — the cardinal
+violation. `PASS` means the dependency direction is clean; `VIOLATION` names the file and line
+to fix. Point it at another package with an argument (e.g. `reference/checkout`).
+
 ## The smell test before you finish
 - Did a domain file gain an `import` from `checkout.adapters`? → wrong; inject a port instead.
+  (The checker catches exactly this — run it.)
 - Did an adapter start deciding policy (who qualifies, what rate)? → move the decision to the domain.
 - Did you construct a concrete adapter outside `main.py`? → move the wiring to the composition root.
 

@@ -272,9 +272,18 @@ A **skill** is like a rule, with one difference that matters at scale: **it load
 decides it's relevant**, instead of sitting in context all the time. That's *progressive disclosure* —
 you keep the always-on charter small and let deep guidance appear exactly when the task calls for it.
 
-The seed ships `seed/.claude/skills/ports-and-adapters/SKILL.md`: the four-step recipe for adding a
-capability behind a port. Its frontmatter `description` is the trigger — the model reads it and pulls in
-the body when you're doing design work ("add a feature", "refactor", "new adapter").
+The seed ships `seed/.claude/skills/ports-and-adapters/`: a `SKILL.md` with the four-step recipe for
+adding a capability behind a port, **plus a bundled checker it runs** — `check_architecture.py`, which
+scans the domain and fails if anything imports a concrete adapter. That's what makes it a skill and not
+just a rule: it carries its own tool. The frontmatter `description` is the trigger — the model reads it
+and pulls in the body (and the checker) when you're doing design work ("add a feature", "refactor").
+
+Run the skill's checker yourself:
+
+```bash
+python .claude/skills/ports-and-adapters/check_architecture.py reference/checkout   # PASS
+python .claude/skills/ports-and-adapters/check_architecture.py checkout             # after your refactor
+```
 
 **Feel the difference.** The always-on architecture rule in `CLAUDE.md` costs context on *every* turn,
 even when you're fixing a typo. The skill costs nothing until you touch the design — then it's there with
