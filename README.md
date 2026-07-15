@@ -256,7 +256,7 @@ ONLY on ports (checkout/ports.py), never on checkout.adapters.
 ```
 
 The bad edit can't survive. **Three things now agree — the rule (feedforward), the code (imitation), and
-the hook (feedback)** — which is exactly the combination the original single-file lab could only gesture at.
+the hook (feedback)** — the full combination a rule or a hook alone could only gesture at.
 
 Reach for feedback on *invariants that must never be violated*, whichever way the agent leans. Reach for
 feedforward on *contested choices the model won't guess right*. A rule without a hook is a suggestion; a
@@ -393,7 +393,8 @@ Module 4, each with "run pytest" as its check. Plan first when the blast radius 
 ## Module 9 · The bigger picture — surfaces and mechanisms
 
 Step back. Everything today was about **bounding what an agent does** and **spending your attention where
-it counts.** Two families, six tools.
+it counts.** Two families: three *surfaces* that bound behavior, and five *mechanisms* that direct the work
+across them.
 
 **Surfaces that bound behavior** — each narrows the *behavior band* (the range of things the agent might
 do). Reliability is just a tight band.
@@ -406,8 +407,10 @@ flowchart LR
     A --> B["Behavior band<br/>(how tight = reliability)"]
 ```
 
-**Mechanisms that direct and package work** — how you get the right instruction, and the right attention,
-to the right place without paying for it everywhere:
+**The five mechanisms that direct and package work** — how you get the right instruction, and the right
+attention, to the right place without paying for it everywhere. (The last row, the code, isn't a mechanism
+you invoke; it's the substrate all five sit on, always on — listed here because it's the one you must keep
+honest.)
 
 | Mechanism | The question it answers | Kind | Reach for it when |
 |---|---|---|---|
@@ -492,8 +495,9 @@ lying about design? What's the one rule or hook worth writing Monday — and the
 - A drift you found by reading code against its charter.
 - **A hexagonal refactor you did by hand** — the drifted service turned into ports and adapters.
 - One of each mechanism you built and ran: a rule, a hook, a command, a skill, an agent.
-- A working mental model: three surfaces bound an agent (instruction, code, feedback) and six mechanisms
-  direct the work — and reliability is just a tight behavior band, bought with the fewest constraints that work.
+- A working mental model: three surfaces bound an agent (instruction, code, feedback) and five mechanisms
+  direct the work (rule, command, skill, hook, agent) — and reliability is just a tight behavior band, bought
+  with the fewest constraints that work.
 - The point under all of it: your job is to solve business problems and to own the change, agent-written or not.
 
 ---
@@ -558,9 +562,11 @@ produces the code but not the judgment that it's right. Then the day's thesis, s
 
 An earlier seed used a value-level trap (cash rounding the wrong way). It demoed *behavioral* slop well, but
 rounding direction is a local decision an agent derives from a rule alone — too easy, and a good rule fixes it
-outright. Design drift is the harder, truer failure: there's no one-line answer to copy, so the surrounding
-code becomes the strongest signal, and a rule alone loses to it (Module 2 shows this live). That's why the
-rule **and** hook here guard an architecture decision, and why the payoff is a refactor, not a one-line fix.
+outright. Design drift is the harder, truer failure: there's no one-line answer to copy, so at scale the surrounding
+code becomes the strongest signal and a rule alone loses to it. (Module 2 shows the *patch* reliably; the
+*live* run is variable, because this lab is deliberately too small to force the drift every time — name that
+caveat in the room rather than promising the agent will misbehave.) That's why the rule **and** hook here
+guard an architecture decision, and why the payoff is a refactor, not a one-line fix.
 
 ## The mechanics you may need to drive live
 
