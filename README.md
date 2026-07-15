@@ -289,21 +289,27 @@ python .claude/skills/ports-and-adapters/check_architecture.py checkout         
 even when you're fixing a typo. The skill costs nothing until you touch the design — then it's there with
 the full recipe. Same guidance, paid for only when used.
 
-**Build one (the lab).** Create `seed/.claude/skills/money-rules/SKILL.md`:
+**Build one (the lab).** Build a second architecture skill — narrower than the shipped one, and
+guidance-only (not every skill needs a bundled script; this shows the range). Create
+`seed/.claude/skills/adapter-purity/SKILL.md`:
 
 ```markdown
 ---
-name: money-rules
-description: Use when touching money, prices, tax, or totals — loads the integer-cents rules.
+name: adapter-purity
+description: Use when editing anything in checkout/adapters/ — loads the rule that adapters hold mechanics only, never business decisions.
 ---
-# Money in this repo
-- Money is integer cents (`Money` in money.py). Never construct it from a float.
-- Format to dollars only at the display edge, never mid-calculation.
-- Tax and discounts are integer math in basis points: cents * bps // 10000.
+# Adapters hold mechanics, not decisions
+An adapter implements a port. It does I/O and mechanics — it must NOT decide policy.
+- Who counts as a member, what the tax rate is, how big a discount is -> the DOMAIN decides.
+- Reading a price, charging a card, printing a receipt -> the ADAPTER does.
+Before finishing an adapter, check that no branch here encodes a business rule:
+    grep -nE "if .*(member|rate|discount|tax)" checkout/adapters/*.py
+If it matches, move the decision into the domain (behind a port) and leave the adapter dumb.
 ```
 
-Now ask the agent to "add a 5% senior discount." Watch it pull in `money-rules` because the task is about
-money — without you loading it, and without it cluttering context when you were doing something else.
+Now ask the agent to "give members a discount inside the cash adapter." Watch `adapter-purity` load
+because you're editing an adapter — and push the decision back into the domain, without you loading it,
+and without it cluttering context when you were doing something else.
 
 | Rule (always on) | Skill (on demand) |
 |---|---|
