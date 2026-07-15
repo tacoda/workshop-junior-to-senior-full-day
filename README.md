@@ -78,19 +78,31 @@ cut Modules 1, 2, and 4 — the read, the compound, and the fix are the arc.
 
 You can read code and you've used an AI coding tool once. That's enough. **Prerequisites:**
 
-- **Python 3.11+**, available on your PATH as `python` (the workshop uses `python` throughout).
+- **Python 3.11+**, available on your PATH as `python3` (the workshop uses `python3` throughout).
 - **A coding agent — [Claude Code](https://claude.com/claude-code) recommended.** The seed's rules, hooks,
   commands, skills, and agents are wired for Claude Code and work out of the box; another capable agentic
   tool can follow along, but you'll adapt the mechanics yourself.
+
+**Python by platform.** The workshop writes every command as `python3`. Get 3.11+ and know what `python3`
+maps to on your machine:
+
+| OS | Get Python 3.11+ | What `python3` means here |
+|---|---|---|
+| **macOS** | `brew install python`, or the [python.org](https://www.python.org/downloads/) installer. (System Python may be absent — install your own.) | `python3` — as written. |
+| **Linux** | Usually preinstalled; otherwise `sudo apt install python3 python3-pip` (Debian/Ubuntu) or your distro's equivalent. | `python3` — as written. |
+| **Windows** | [python.org](https://www.python.org/downloads/) installer — check **"Add python.exe to PATH"**. | Native Windows has no `python3`: use **`python`** (or **`py -3`**). In **WSL** or **Git Bash**, `python3` works as written. |
+
+The seed's hooks call `python3` too (in `.claude/settings.json`); on native Windows, change those two
+commands to `python` — or just run the lab in WSL/Git Bash, where nothing needs changing.
 
 Run this first and confirm a green suite — don't debug your environment on lab time:
 
 ```bash
 git clone https://github.com/tacoda/workshop-junior-to-senior-full-day.git
 cd workshop-junior-to-senior-full-day/seed
-python --version                  # 3.11 or newer
+python3 --version                 # 3.11 or newer
 pip install pytest && pytest      # 5 passed — you're ready
-python main.py                    # prints two receipts
+python3 main.py                    # prints two receipts
 ```
 
 Have your coding agent installed and working on the `seed/` folder *before* the session — Modules 2, 4, 6,
@@ -127,7 +139,7 @@ Everything is in `seed/`. First, read the **charter**, then the **code**, and no
 
 ```bash
 pytest                       # 5 passed
-python main.py               # cash $11.70, card $11.73
+python3 main.py               # cash $11.70, card $11.73
 ```
 
 Open `seed/CLAUDE.md`. It states a clear architecture rule: **ports and adapters** — the core depends
@@ -154,7 +166,7 @@ us when asked to add a member discount "using ports and adapters" against this t
 ```bash
 git apply patches/agent-adds-discount.diff
 pytest                       # still green — the inline discount passes the suite
-python main.py               # works; a member list and a rate bolted into checkout.py, no port
+python3 main.py               # works; a member list and a rate bolted into checkout.py, no port
 git apply -R patches/agent-adds-discount.diff
 ```
 
@@ -314,8 +326,8 @@ and pulls in the body (and the checker) when you're doing design work ("add a fe
 Run the skill's checker yourself:
 
 ```bash
-python .claude/skills/ports-and-adapters/check_architecture.py reference/checkout   # PASS
-python .claude/skills/ports-and-adapters/check_architecture.py checkout             # after your refactor
+python3 .claude/skills/ports-and-adapters/check_architecture.py reference/checkout   # PASS
+python3 .claude/skills/ports-and-adapters/check_architecture.py checkout             # after your refactor
 ```
 
 **Feel the difference.** The always-on architecture rule in `CLAUDE.md` costs context on *every* turn,

@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """LATE design feedback: block the commit if the domain depends on an adapter.
 
 Same ports-and-adapters check as architecture-gate-edit.py, wired as a PreToolUse

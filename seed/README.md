@@ -48,11 +48,11 @@ hexagon** — turning the top level into something that matches `reference/`.
 ```bash
 pip install pytest
 pytest                                   # 5 passed — the drifted code is green
-python main.py                           # cash $11.70 (rounded down), card $11.73
+python3 main.py                           # cash $11.70 (rounded down), card $11.73
 
 git apply patches/agent-adds-discount.diff
 pytest                                   # still green — the agent's inline discount passes the suite
-python main.py                           # works; the design is worse; the tests never noticed
+python3 main.py                           # works; the design is worse; the tests never noticed
 git apply -R patches/agent-adds-discount.diff
 
 cd reference && pytest                   # 9 passed — the clean hexagon, the target of the refactor

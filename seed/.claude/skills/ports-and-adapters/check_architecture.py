@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """Bundled with the ports-and-adapters skill: verify the hexagon's dependency rule.
 
 Scans the domain files of a checkout package and reports any that import a concrete

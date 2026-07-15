@@ -4,7 +4,7 @@ A service that settles a bill and prints a receipt. Small enough to hold in your
 which is the point: you should be able to comprehend every line before you change it.
 
 ## Run it
-    python main.py
+    python3 main.py
 
 ## Test it
     pip install pytest && pytest
