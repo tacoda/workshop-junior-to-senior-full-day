@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 """FAST design feedback: keep the hexagon's dependencies pointing inward.
 
 A hook is not only for values — it can guard a *design invariant*. The

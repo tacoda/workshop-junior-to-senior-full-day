@@ -76,19 +76,25 @@ cut Modules 1, 2, and 4 — the read, the compound, and the fix are the arc.
 
 ## Before you start — get to green
 
-You can read code and you've used an AI coding tool once. That's enough. Run this first and confirm a
-green suite — don't debug your environment on lab time:
+You can read code and you've used an AI coding tool once. That's enough. **Prerequisites:**
+
+- **Python 3.11+**, available on your PATH as `python` (the workshop uses `python` throughout).
+- **A coding agent — [Claude Code](https://claude.com/claude-code) recommended.** The seed's rules, hooks,
+  commands, skills, and agents are wired for Claude Code and work out of the box; another capable agentic
+  tool can follow along, but you'll adapt the mechanics yourself.
+
+Run this first and confirm a green suite — don't debug your environment on lab time:
 
 ```bash
 git clone https://github.com/tacoda/workshop-junior-to-senior-full-day.git
 cd workshop-junior-to-senior-full-day/seed
+python --version                  # 3.11 or newer
 pip install pytest && pytest      # 5 passed — you're ready
 python main.py                    # prints two receipts
 ```
 
-**You'll also need your AI coding tool (e.g. Claude Code)** opened on the `seed/` folder for Modules 2,
-4, 6, 7, and 8. Have it installed and working *before* the session. Anyone red at the start pairs with
-someone green.
+Have your coding agent installed and working on the `seed/` folder *before* the session — Modules 2, 4, 6,
+7, and 8 all use it live. Anyone red at the start pairs with someone green.
 
 ## Your tool: the comprehension card
 
@@ -308,8 +314,8 @@ and pulls in the body (and the checker) when you're doing design work ("add a fe
 Run the skill's checker yourself:
 
 ```bash
-python3 .claude/skills/ports-and-adapters/check_architecture.py reference/checkout   # PASS
-python3 .claude/skills/ports-and-adapters/check_architecture.py checkout             # after your refactor
+python .claude/skills/ports-and-adapters/check_architecture.py reference/checkout   # PASS
+python .claude/skills/ports-and-adapters/check_architecture.py checkout             # after your refactor
 ```
 
 **Feel the difference.** The always-on architecture rule in `CLAUDE.md` costs context on *every* turn,
