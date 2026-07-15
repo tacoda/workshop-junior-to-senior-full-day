@@ -1,0 +1,7 @@
+__pycache__/
+*.pyc
+.pytest_cache/
+.DS_Store
+
+# Parked tracks — not part of the published first workshop
+_dropped-tracks.md

@@ -1,0 +1,14 @@
+--- a/test_money.py
++++ b/test_money.py
+@@ -14,3 +14,11 @@
+ 
+ def test_zero():
+     assert round_cash(0) == 0
++
++
++def test_cash_never_rounds_up():
++    # Cash rounding is the customer's favor: never above the marked total.
++    # Uses totals whose remainder is 3-4 cents, which the shipped suite never did —
++    # this is the test that catches the planted "round to nearest".
++    for total in [1083, 1084, 999]:
++        assert round_cash(total) == total - (total % 5)
