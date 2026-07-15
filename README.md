@@ -141,26 +141,37 @@ A filled card naming the drift is your first deliverable — and everyone reache
 
 ## Module 2 · Watch the drift compound
 
-Here is why the drift matters. Open `seed/` in your AI tool and ask it, verbatim:
-
-> Add a member discount: members get 10% off. Follow the charter — use ports and adapters.
-
-Watch what it does. Even told to use ports and adapters, a capable agent will usually **bolt the discount
-straight into `checkout.py`** — a member list and a percentage inlined into the tangled method — because
-*that is the pattern the surrounding code shows it.* The code is a louder instruction than the rule.
-
-Don't have time to run it live? Apply the version an agent handed us:
+Here is why the drift matters. First, look at what drift *looks like* — apply the version an agent handed
+us when asked to add a member discount "using ports and adapters" against this tangled code:
 
 ```bash
 git apply patches/agent-adds-discount.diff
 pytest                       # still green — the inline discount passes the suite
-python main.py
+python main.py               # works; a member list and a rate bolted into checkout.py, no port
 git apply -R patches/agent-adds-discount.diff
 ```
 
-This is the scale effect the whole workshop points at: **a rule the code contradicts is a rule the agent
-contradicts too.** The more non-compliant code there is, the stronger the pull. You cannot fix this with a
-better rule alone — you have to fix the *code*, so the example the agent imitates is the right one.
+The suite never noticed the design got worse. That is the point: **more inline logic, still green.** This
+patch is the reliable artifact — run it every time.
+
+Now run it live to feel the variance. Open `seed/` in your AI tool and ask it, verbatim:
+
+> Add a member discount: members get 10% off. Follow the charter — use ports and adapters.
+
+**Two things can happen, and both teach the lesson.** On a repo this small, with the charter right in front
+of it, a capable agent often *complies* — it defines a `DiscountPolicy` port and an adapter, ignoring the
+tangle. Good. But it may just as easily copy the surrounding shape and inline the discount into `checkout.py`
+(the patch above is exactly that). Which one you get is not reliable — and that unreliability is itself the
+finding.
+
+> **The drift is a scale effect.** Here the rule is one short file and the counterexample is one small class,
+> so a strong model can still hear the rule over the code. In a real codebase — the rule buried in a long
+> charter, round-the-wrong-way patterns repeated across dozens of call sites — *the code becomes the loudest
+> instruction*, and the agent copies it past a rule it barely weighs. The lab is too small to force this every
+> time; the patch shows you what it produces, and the takeaway is what it points at: **a rule the code
+> contradicts is a rule the agent will eventually contradict too.** You cannot fix that with a better rule
+> alone — you have to fix the *code*, so the example the agent imitates is the right one, and gate it so it
+> stays that way.
 
 ## Module 3 · Rules at depth — feedforward and the specificity knob
 
@@ -176,8 +187,10 @@ Swap the vague rule into `CLAUDE.md`, restart the agent, and re-run Module 2's p
 rule fail to steer. **A rule you cannot fail is a rule that cannot steer.** Reach for feedforward on
 *contested decisions the model won't guess right* — here, where the seams go — not on things it already does.
 
-But notice the ceiling: in Module 2, even the *concrete* rule lost to the drifted code. Feedforward is
-necessary and not sufficient. Which is why the next move is to fix the code — and then gate it.
+But notice the ceiling. Even the *concrete* rule only holds while the codebase is small enough for the agent
+to hear it over the code (Module 2) — and at scale the code wins. Feedforward is necessary and not
+sufficient. Which is why the next move is to fix the code — and then gate it, so the guarantee doesn't depend
+on which way the agent leaned today.
 
 ## Module 4 · The refactor — make the code match the rule *(the payoff)*
 
@@ -198,13 +211,26 @@ Refactor in small, verifiable steps, running `pytest` after each so behavior nev
    them; it imports `checkout.ports` and nothing from `checkout.adapters`.
 5. **Wire it in `main.py`.** The composition root constructs the concrete adapters and passes them in.
 
+**Two decisions the recipe forces — expect them, they're part of the lab.** The shipped tests were written
+against the tangled code, so making the code hexagonal breaks them, and *that's the senior work*:
+
+- **The tests must move to the composition root too.** `tests/test_checkout.py` calls `CheckoutService()`
+  with no arguments — which stops compiling the moment the service takes its ports by injection (step 4).
+  Don't add default concrete adapters to `__init__` to keep the old call working: that forces `service.py`
+  to import `checkout.adapters` and trips the hook. Instead, build the service through a helper in `main.py`
+  and have the test call that — a behavior-preserving change. `reference/tests/` shows the pattern.
+- **Moving `Money` into the package breaks `from money import Money`.** `tests/test_money.py` and the old
+  `main.py` import top-level `money`. When `Money` moves to `checkout/money.py`, update those imports (or
+  leave a one-line re-export shim at `money.py`). Either is fine — but the recipe won't decide it for you.
+
 Run `pytest` — still green, same behavior, completely different design. Then compare against
 `reference/` (`cd reference && pytest` → 9 passed). **The difference is the deliverable:** the drift you
 read in Module 1 is gone, and the example the agent will imitate next is now the correct one.
 
 > Re-run Module 2's prompt against your refactored code. With the surrounding code now hexagonal, the agent
-> adds the discount as a `DiscountPolicy` port — because that is the pattern it now sees. Same rule, same
-> agent, opposite result. **The code was the deciding vote all along.**
+> is far likelier to add the discount as a `DiscountPolicy` port — the pattern it now sees. The code stopped
+> voting for the tangle. **That vote was the deciding one all along** — which is why fixing the code, not
+> just the rule, is the senior move.
 
 ## Module 5 · Hooks at depth — feedback and the position knob
 
@@ -511,8 +537,11 @@ tangled code into a clean hexagon by hand and re-runs the agent to see it now do
   `pytest` **and** the AI tool must be green before the room starts. Anyone red pairs with someone green.
 - **Cut talk before lab.** If you run long, shrink M9 and the talk; never M1/M2/M4.
 - **Protect the discovery.** Don't pre-spoil "green ≠ design." Let M1 land it and M2 sting.
-- **Regroup on the compound.** After M2, surface out loud: *the agent had the rule and still copied the code.*
-  That's the scale lesson; say it plainly.
+- **Regroup on the compound.** The live M2 run is *variable* — on a repo this small a capable agent often
+  complies and builds the port. Don't fight it: when it complies, say *"good — and notice it took a strong
+  model on a tiny repo to hear the rule over the code; at scale the code wins,"* then show the drift with the
+  patch. When it drifts, say *"the agent had the rule and copied the code anyway."* Either way the artifact
+  to point at is `patches/agent-adds-discount.diff`. The scale lesson lands regardless; lead with the patch.
 - **Lunch splits M3/M4** on purpose — people come back to the payoff, not the setup.
 
 ## The frame — the talk
