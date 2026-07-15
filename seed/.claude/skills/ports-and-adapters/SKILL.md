@@ -32,7 +32,7 @@ Concrete adapters are constructed only in `main.py`.
 This skill ships a checker. After you add or refactor, run it and paste the result:
 
 ```bash
-python "$CLAUDE_PROJECT_DIR/.claude/skills/ports-and-adapters/check_architecture.py" checkout
+python3 "$CLAUDE_PROJECT_DIR/.claude/skills/ports-and-adapters/check_architecture.py" checkout
 ```
 
 It scans the domain files and fails (exit 1) if any imports a concrete adapter — the cardinal

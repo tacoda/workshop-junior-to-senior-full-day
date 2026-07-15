@@ -307,8 +307,8 @@ and pulls in the body (and the checker) when you're doing design work ("add a fe
 Run the skill's checker yourself:
 
 ```bash
-python .claude/skills/ports-and-adapters/check_architecture.py reference/checkout   # PASS
-python .claude/skills/ports-and-adapters/check_architecture.py checkout             # after your refactor
+python3 .claude/skills/ports-and-adapters/check_architecture.py reference/checkout   # PASS
+python3 .claude/skills/ports-and-adapters/check_architecture.py checkout             # after your refactor
 ```
 
 **Feel the difference.** The always-on architecture rule in `CLAUDE.md` costs context on *every* turn,
