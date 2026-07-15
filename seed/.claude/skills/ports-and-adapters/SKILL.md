@@ -37,7 +37,9 @@ python "$CLAUDE_PROJECT_DIR/.claude/skills/ports-and-adapters/check_architecture
 
 It scans the domain files and fails (exit 1) if any imports a concrete adapter — the cardinal
 violation. `PASS` means the dependency direction is clean; `VIOLATION` names the file and line
-to fix. Point it at another package with an argument (e.g. `reference/checkout`).
+to fix. A third result, `nothing to check` (exit 0), means no domain files were found under the
+package — the code is still one tangled module and the hexagon hasn't been built yet, so refactor
+first. Point it at another package with an argument (e.g. `reference/checkout`).
 
 ## The smell test before you finish
 - Did a domain file gain an `import` from `checkout.adapters`? → wrong; inject a port instead.
