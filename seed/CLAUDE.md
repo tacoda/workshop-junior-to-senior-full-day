@@ -1,24 +1,41 @@
-# checkout — a tiny cash-register service
+# checkout — a small cash-register service
 
-A tiny service that settles a bill for cash and prints a receipt. Small enough to hold in your
-head, which is the point: you should be able to comprehend every line before you change it.
+A service that settles a bill and prints a receipt. Small enough to hold in your head,
+which is the point: you should be able to comprehend every line before you change it.
 
 ## Run it
-    python app.py
+    python main.py
 
 ## Test it
     pip install pytest && pytest
 
 ## Money
-Money is handled as **integer cents** — see `money.py`. Formatting to dollars happens only at the
-edge, when printing a receipt.
+Money is handled as **integer cents** — see `money.py`. Formatting to dollars happens only
+at the display edge, never mid-calculation.
 
-## Rules
-> Learners author these rules. The load-bearing one is the cash-rounding policy — a decision the
-> code makes silently unless you make it explicit.
+## Architecture — ports and adapters (the load-bearing rule)
+
+This service is meant to be built as **ports and adapters** (a.k.a. hexagonal):
+
+- **The domain is the core** — the pricing, tax, and settlement logic. It is written against
+  **ports** (interfaces) and nothing else.
+- **A port** is an interface the domain depends on: *how prices are looked up*, *how a total is
+  settled*, *where a receipt goes*. The domain names the port; it never names a concrete.
+- **An adapter** is a concrete implementation of a port: an in-memory catalog, a cash payment,
+  a console receipt printer. Adapters hold the mechanics and the I/O.
+- **Wiring happens in one place** — the composition root (`main.py`) picks which adapters to
+  plug into the domain. Nothing else constructs a concrete adapter.
+
+**The rule the agent must follow:**
+
+> The domain depends **only on ports**, never on a concrete adapter (`checkout.adapters.*`).
+> Every external concern — pricing, payment, receipts, persistence, discounts — enters the
+> domain through a port. Adapters implement ports and hold no business decisions. Concrete
+> adapters are constructed **only** in `main.py`.
 >
-> - **Iron law:** money is integer cents; never use `float` to store or compute money.
-> - **Rounding policy:** pennies are discontinued, so cash totals round to a nickel (5 cents).
->   Round **DOWN**, always in the **customer's favor** — never round up, and never round to the
->   nearest nickel. A customer never pays more than the marked total.
-> - **Preference:** format money for display only, never mid-calculation.
+> When you add a capability, define its port first, implement it as an adapter, and inject it.
+> Do **not** reach for a concrete inside the domain, and do **not** put business rules in an adapter.
+
+## Preferences
+- Format money for display only, at the edge — never mid-calculation.
+- Prefer small, single-purpose classes over one class that does everything.

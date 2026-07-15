@@ -1,0 +1,22 @@
+diff --git a/checkout.py b/checkout.py
+index 07ef719..20a642e 100644
+--- a/checkout.py
++++ b/checkout.py
+@@ -18,11 +18,16 @@ from money import Money
+ 
+ CATALOG = {"COFFEE": 500, "MUG": 584}  # price data baked into the core (should be behind a port)
+ TAX_RATE_BPS = 825  # 8.25% sales tax, in basis points — integer math only
++MEMBERS = {"alice", "bob"}  # member list, baked into the core too
++MEMBER_RATE_BPS = 1000  # 10% member discount
+ 
+ 
+ class CheckoutService:
+-    def checkout(self, skus, payment_type):
++    def checkout(self, skus, payment_type, customer_id=None):
+         subtotal = Money(sum(CATALOG[sku] for sku in skus))
++        # member discount, decided right here — no port, no adapter
++        if customer_id in MEMBERS:
++            subtotal = subtotal - Money(subtotal.cents * MEMBER_RATE_BPS // 10000)
+         tax = Money(subtotal.cents * TAX_RATE_BPS // 10000)
+         total = subtotal + tax
+ 

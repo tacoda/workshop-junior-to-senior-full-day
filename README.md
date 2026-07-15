@@ -1,21 +1,73 @@
-# How to Grow from Junior to Senior in the Age of AI
+# How to Grow from Junior to Senior in the Age of AI — Full-Day Workshop
 
 The agent changes what it means to be junior more than what it means to be senior. A senior
 already has the judgment the tool can't supply. A junior is building that judgment at the exact
 moment the tool offers to skip it — it hands you working code faster than you can understand it,
 and the whole pull is to accept the diff and move on. This workshop is the structured refusal to
-skip.
+skip, stretched across a full day on a codebase big enough to have real design decisions.
 
-- **Who it's for:** early-career engineers working with an AI coding tool, and the leads who
-  mentor them.
-- **What you leave with:** the comprehension card (one rule, five questions, five moves) and a
-  habit you can run on real work Monday morning.
-- **The seam it drives home:** the agent produces plausible code fast; seniority is the judgment
-  to tell plausible from correct. That judgment is trained, not downloaded.
+- **Who it's for:** early-career engineers working with an AI coding tool, and the leads who mentor them.
+- **What you leave with:** the comprehension card, a hexagonal refactor you did by hand, one of each
+  charter mechanism (rule, hook, command, skill, agent) that you built and ran, and a daily habit.
+- **The spine:** the agent produces plausible code fast; seniority is the judgment to tell plausible
+  from correct — and, at this scale, to tell *code that matches its charter* from *code that has drifted*.
+  That judgment is trained, not downloaded.
 
-> Work straight through **[The Lab](#the-lab)** — that's the 90-minute session.
+> Work straight through **[The Lab](#the-lab)** — that's the six-hour session. **Lunch does not count
+> toward the six hours.** The session ends with **[open Q&A](#open-qa-and-wrap)**.
 > **[After the workshop](#after-the-workshop--the-take-home-lab)** is your take-home reps;
 > **[Instructor notes](#instructor-notes)** are at the very bottom.
+
+---
+
+## Ports and adapters in 60 seconds (out of scope — but it's our example)
+
+We are **not here to teach ports and adapters.** It's just the design our example app uses, and you
+only need a plain-language picture of it to follow along. Here it is.
+
+Imagine a coffee shop's checkout. The **core job** is: add up the prices, add tax, take the payment,
+print a receipt. That core shouldn't care *how* payment happens — cash drawer, card reader, phone tap.
+It just needs "something that can take a payment."
+
+- A **port** is the *shape of a helper the core needs*, described as a promise: "give me something that
+  can look up a price," "…that can settle a total," "…that can print a receipt." The core talks to the
+  promise, not to any particular gadget.
+- An **adapter** is a *real gadget that keeps the promise*: the actual cash drawer, the actual card
+  reader. You can swap one for another and the core never notices.
+- The **one wiring spot** (`main.py`) is where you decide, today, which real gadgets to plug in.
+
+The rule that makes it "ports and adapters": **the core depends only on the promises (ports), never on
+a specific gadget (adapter).** That's it. If you remember one sentence: *the core names what it needs;
+the edges provide it; they meet in one wiring spot.* When our example code breaks that rule, that's the
+drift we're hunting — you don't need to be a hexagonal-architecture expert to see a rule being broken.
+
+---
+
+## The full day at a glance
+
+Six hours of active time, split by lunch (which doesn't count). Breaks included. Q&A closes the day.
+
+| Clock | Min | Segment |
+|---|---|---|
+| 0:00 | 25 | Welcome, the frame, and the comprehension card |
+| 0:25 | 20 | Ports and adapters in 60 seconds; read the app |
+| 0:45 | 40 | **Module 1** — Comprehension: read the drift |
+| 1:25 | 10 | Break |
+| 1:35 | 35 | **Module 2** — Watch the drift compound (the agent imitates the code) |
+| 2:10 | 25 | **Module 3** — Rules at depth (feedforward; the specificity knob) |
+| — | — | **Lunch — does not count toward the six hours** |
+| 2:35 | 40 | **Module 4** — The refactor: fix the code to match the rule (hands-on) |
+| 3:15 | 30 | **Module 5** — Hooks at depth (feedback; the position knob) |
+| 3:45 | 10 | Break |
+| 3:55 | 30 | **Module 6** — Commands (build-it lab) |
+| 4:25 | 30 | **Module 7** — Skills (build-it lab) |
+| 4:55 | 35 | **Module 8** — Agents (build-it lab) and planning with `/plan` |
+| 5:30 | 15 | **Module 9** — The bigger picture: surfaces and mechanisms |
+| 5:45 | 15 | **Module 10** — Mindset, strategies, pairing with a senior |
+| 6:00 | — | **Open Q&A** to the end of the session |
+
+Tight on time? Safe cuts, in order: Module 9 → the second half of Module 3 → shrink the talk. Never
+cut Modules 1, 2, and 4 — the read, the compound, and the fix are the arc.
 
 ---
 
@@ -23,328 +75,410 @@ skip.
 
 ## Before you start — get to green
 
-You can read code and you've used an AI coding tool once. That's enough. Run this first and
-confirm a green suite — don't debug your environment on lab time:
+You can read code and you've used an AI coding tool once. That's enough. Run this first and confirm a
+green suite — don't debug your environment on lab time:
 
 ```bash
-git clone https://github.com/tacoda/workshop-junior-to-senior.git
-cd workshop-junior-to-senior/seed
-pip install pytest && pytest      # 3 passed — you're ready
+git clone https://github.com/tacoda/workshop-junior-to-senior-full-day.git
+cd workshop-junior-to-senior-full-day/seed
+pip install pytest && pytest      # 5 passed — you're ready
+python main.py                    # prints two receipts
 ```
 
-⟲ **No local setup?** Pair with someone who's green, or run it in any browser Python sandbox —
-the seed is two small files.
-
-**For Step 4** you'll also use your AI coding tool (e.g. Claude Code) opened on the `seed/` folder —
-have it installed and working before the session, not during it.
-
-**What you'll work on.** The seed in [`seed/`](./seed/) is a tiny cash-register service: it settles
-a bill for cash and prints a receipt. Pennies are discontinued, so cash totals round to a nickel —
-and the decision that matters is **which way they round.** The charter's policy is *round down, in
-the customer's favor*: they never pay more than the marked total. That single policy is what makes a
-plausible-but-wrong change catchable.
+**You'll also need your AI coding tool (e.g. Claude Code)** opened on the `seed/` folder for Modules 2,
+4, 6, 7, and 8. Have it installed and working *before* the session. Anyone red at the start pairs with
+someone green.
 
 ## Your tool: the comprehension card
 
-This is the whole method on one page. You'll use it in the lab and keep it next to your keyboard
-after.
+The whole method on one page. Use it in the lab and keep it next to your keyboard after.
 
 ```text
 THE DAILY RULE
   Don't merge a change you can't explain — to the agent, out loud, in your own words.
   Green pipeline = permission to proceed. Red = a lesson before a human had to teach it.
+  And: green means the tests that exist passed — not that the design is right.
 
-FIVE QUESTIONS (comprehension in — ask these of any diff)
+FIVE QUESTIONS (comprehension in — ask these of any diff or file)
   1. What does this do, in one sentence?
   2. Where does the change enter the system, and where does it leave?
   3. Why is it written this way? (If neither a rule nor a doc answers, you found a charter gap.)
-  4. Is it consistent with the rest of the codebase? Which nearby code disagrees?
-  5. Which part would I call slop if an agent wrote it — plausible, passing, quietly wrong?
+  4. Is it consistent with the rest of the codebase AND the charter? Which nearby code disagrees?
+  5. Which part would I call slop if an agent wrote it — plausible, passing, quietly wrong or drifted?
 
 FIVE MOVES (comprehension out — the junior→senior cases)
   1. Characterize before you change — pin current behavior in a test before you touch it.
   2. Rename in anger — fix the worst-named thing everywhere; watch it clarify.
   3. Make it boring — rewrite the clever version as the one you'd rather debug at 3 a.m.
   4. Predict the failure — write how you expect it to fail, then run it. Were you right?
-  5. Catch the agent being wrong — find the confident, fluent, wrong answer. Prove it.
+  5. Catch the agent being wrong — find the confident, fluent, wrong (or drifted) answer. Prove it.
 ```
 
-## Step 1 · Baseline, then spring the trap
+## Module 1 · Comprehension — read the drift
 
-Everything is in `seed/`. Copy-paste this block and read the comments as you go:
+Everything is in `seed/`. First, read the **charter**, then the **code**, and notice they disagree.
 
 ```bash
-cd seed
-pytest                                       # 3 passed
-python app.py                                # cash total $10.80   ← rounded down, customer's favor
-
-git apply patches/plausible-but-wrong.diff   # a diff "an agent handed you" — looks cleaner
-pytest                                        # still 3 passed  ← the trap
-python app.py                                 # cash total $10.85  ← a nickel overcharged
+pytest                       # 5 passed
+python main.py               # cash $11.70, card $11.73
 ```
 
-Look at those last two lines. The test suite is **green**, and yet the customer is now billed a
-nickel more than the marked total. This is the one idea the whole session is built on:
+Open `seed/CLAUDE.md`. It states a clear architecture rule: **ports and adapters** — the core depends
+only on ports, adapters hold the mechanics, concretes are wired only in `main.py`.
 
-> **Green means "the tests that exist passed," not "the code is correct."**
+Now open `seed/checkout.py`. It does the opposite. One `CheckoutService.checkout` method looks up prices
+from a dict baked into the core, computes tax, branches on cash-vs-card inline, and formats and prints
+the receipt — all in one place. No ports. No adapters. The charter says one thing; the code does another.
 
-The shipped suite only used totals that round the same way either direction, so it never noticed the
-flip. The diff rounds to the *nearest* nickel — the textbook cash-rounding scheme, written with a
-`float` — instead of *down*, the charter's customer's-favor policy. Leave the diff applied; you'll
-investigate it next.
+Run the five questions on `checkout.py`, out loud, with a partner. The one that bites is **question 4**:
+*is it consistent with the charter?* It is not — and the tests are green anyway, because they only check
+that the totals come out right (**behavior**), never how the code is arranged (**design**).
 
-## Step 2 · Run the five questions (comprehension *in*)
+> **Green means "the tests that exist passed," not "the code matches the charter."** A behavior suite
+> cannot see design drift. That's the same lesson as "green ≠ correct," one level up.
 
-Open `seed/money.py` and read the change you just applied. With a partner if you can, work down the
-five questions from the card, out loud. Write your answers down:
+A filled card naming the drift is your first deliverable — and everyone reaches it.
 
-1. **What does it do, in one sentence?** (`round_cash` now rounds to the *nearest* nickel, not down.)
-2. **Where does the change enter and leave?** Trace it from `app.py` into `money.py` and back to the
-   printed cash total.
-3. **Why is it written this way?** The comment says "simplified." Rounding to nearest *is* the
-   textbook cash scheme — but is it *this business's* policy? And why is there suddenly a `float`?
-4. **Is it consistent?** The docstring still promises cash rounds "in the customer's favor," and the
-   charter's iron law says integer cents only. The code now breaks both. Which do you trust?
-5. **What would you call slop?** Name the exact line that is plausible, passing, and quietly wrong.
+## Module 2 · Watch the drift compound
 
-A filled card is your first deliverable — and everyone reaches it.
+Here is why the drift matters. Open `seed/` in your AI tool and ask it, verbatim:
 
-## Step 3 · Prove it wrong (comprehension *out*)
+> Add a member discount: members get 10% off. Follow the charter — use ports and adapters.
 
-Suspicion isn't a catch. Turn it into a test that fails:
+Watch what it does. Even told to use ports and adapters, a capable agent will usually **bolt the discount
+straight into `checkout.py`** — a member list and a percentage inlined into the tangled method — because
+*that is the pattern the surrounding code shows it.* The code is a louder instruction than the rule.
 
-- A $10.83 total is 1083¢. Customer's favor rounds **down** to `1080` ($10.80). The "simplified"
-  code rounds to nearest: `1085` ($10.85) — a nickel the customer never owed.
-- Write one test asserting cash never rounds *up*, using totals whose last digit forces the
-  direction — the case the shipped suite skipped:
-
-```python
-def test_cash_never_rounds_up():
-    for total in [1083, 1084, 999]:
-        assert round_cash(total) == total - (total % 5)
-```
-
-Run `pytest`. It goes **red** on the diff — you just caught a confident, fluent, wrong answer and
-proved it. That red test is the day you stop being junior, in miniature. Reset before the next step:
+Don't have time to run it live? Apply the version an agent handed us:
 
 ```bash
-git apply -R patches/plausible-but-wrong.diff
+git apply patches/agent-adds-discount.diff
+pytest                       # still green — the inline discount passes the suite
+python main.py
+git apply -R patches/agent-adds-discount.diff
 ```
 
-## Step 4 · The two loops — a rule and a hook
+This is the scale effect the whole workshop points at: **a rule the code contradicts is a rule the agent
+contradicts too.** The more non-compliant code there is, the stronger the pull. You cannot fix this with a
+better rule alone — you have to fix the *code*, so the example the agent imitates is the right one.
 
-You caught the overcharge by hand. Now let the *charter* catch it for you, with the two mechanisms
-every charter is built from:
+## Module 3 · Rules at depth — feedforward and the specificity knob
 
-- **Feedforward** — a **rule** in `CLAUDE.md` that shapes the code *before* it's written.
-- **Feedback** — a **hook** in `.claude/hooks/` that checks the result *after* and refuses a bad one.
+A **rule** is *feedforward*: guidance that shapes the code *before* it's written. Its design choice is
+**specificity**. The seed ships the architecture rule in two strengths so you can feel the tradeoff.
 
-Both are already on. Open the `seed/` folder in Claude Code and run two quick prompts.
-
-1. **The rule steers (feedforward).** Ask your agent, verbatim:
-   > Show me how you'd implement `round_cash(total_cents)` — round a cash total to a nickel now that
-   > pennies are gone.
-
-   With the rounding rule in `CLAUDE.md`, it rounds **down**, in the customer's favor
-   (`total_cents - total_cents % 5`). Without that rule a capable agent rounds to the *nearest*
-   nickel — the overcharge from Step 1. The rule is the difference.
-
-2. **The hook catches (feedback).** Now ask it to write the bad version anyway:
-   > Simplify `round_cash` to round to the nearest nickel: `round(total_cents / 5) * 5`.
-
-   The moment it saves `money.py`, the hook fires and blocks it:
-   ```text
-   round-gate (edit): round_cash(1083) = 1085, but the customer's-favor amount is 1080 — cash rounded against the customer.
-   ```
-   Told *why*, the agent puts it back. The same gate also blocks at `git commit`, so a bad version
-   can't be saved *or* shipped.
-
-**One rule, one hook:** the rule shaped the draft, the hook caught the one that slipped. That's the
-whole toolkit a charter uses to bound what an agent does.
-
-## How it works — the two knobs
-
-You just used one setting of each loop. Both have a design choice, and the seed ships two examples
-of each so you can feel the tradeoff, not just read it.
-
-**Feedforward — the rule's *specificity* (`seed/.claude/rules/`).** A rule you cannot fail is a
-rule that cannot steer.
-
-| Rule | What it says | Tradeoff |
+| Rule (`seed/.claude/rules/`) | What it says | Tradeoff |
 |---|---|---|
-| `cash-vague.md` | "Round cash fairly to a nickel." | Cheap, universal, ages well — and exerts almost no force. Nearest-nickel reads as compliant. |
-| `cash-concrete.md` | "Round *down* to the nickel; 1083¢ settles at 1080, not 1085; integer math." | More work, narrower scope — but it decides a contested choice the agent would otherwise make for you. |
+| `architecture-vague.md` | "Keep the architecture clean; separate concerns." | Cheap, universal, ages well — and exerts almost no force. A tangled class reads as "separated concerns." |
+| `architecture-concrete.md` | "Domain imports `checkout.ports` and never `checkout.adapters`; new concerns enter through a port; concretes wired only in `main.py`; discounts are a `DiscountPolicy` port, not an inline member list." | More work, narrower — but it names the boundary precisely enough that a violation is unambiguous, to a human *and* to a hook. |
 
-**Feedback — the gate's *position* (`seed/.claude/hooks/`).** Same check, different distance from
-the mistake. The earlier the loop closes, the cheaper the fix.
+Swap the vague rule into `CLAUDE.md`, restart the agent, and re-run Module 2's prompt: watch the vague
+rule fail to steer. **A rule you cannot fail is a rule that cannot steer.** Reach for feedforward on
+*contested decisions the model won't guess right* — here, where the seams go — not on things it already does.
 
-| Hook | Event | Speed / consequence |
+But notice the ceiling: in Module 2, even the *concrete* rule lost to the drifted code. Feedforward is
+necessary and not sufficient. Which is why the next move is to fix the code — and then gate it.
+
+## Module 4 · The refactor — make the code match the rule *(the payoff)*
+
+This is the senior move and the heart of the day. You will turn the drifted `checkout.py` into the ports-
+and-adapters shape the charter always asked for. The answer key lives in `seed/reference/` — glance at it
+when stuck, but do the moves yourself first.
+
+Refactor in small, verifiable steps, running `pytest` after each so behavior never changes:
+
+1. **Extract the domain values.** Move `Money` reasoning and receipt data into small domain types
+   (`checkout/money.py`, `checkout/model.py`). Run the tests.
+2. **Name the ports.** Create `checkout/ports.py` with three Protocols: `PricingProvider` (look up a
+   price), `PaymentMethod` (settle a total), `ReceiptSink` (emit a receipt). This is "the core names what
+   it needs."
+3. **Push mechanics to adapters.** Move the catalog dict into `InMemoryCatalog`, the cash/card branch into
+   `CashPayment`/`CardPayment`, the printing into `ConsoleReceiptSink` — each in `checkout/adapters/`.
+4. **Rewrite the service against ports.** `CheckoutService` now takes its ports by injection and orchestrates
+   them; it imports `checkout.ports` and nothing from `checkout.adapters`.
+5. **Wire it in `main.py`.** The composition root constructs the concrete adapters and passes them in.
+
+Run `pytest` — still green, same behavior, completely different design. Then compare against
+`reference/` (`cd reference && pytest` → 9 passed). **The difference is the deliverable:** the drift you
+read in Module 1 is gone, and the example the agent will imitate next is now the correct one.
+
+> Re-run Module 2's prompt against your refactored code. With the surrounding code now hexagonal, the agent
+> adds the discount as a `DiscountPolicy` port — because that is the pattern it now sees. Same rule, same
+> agent, opposite result. **The code was the deciding vote all along.**
+
+## Module 5 · Hooks at depth — feedback and the position knob
+
+A rule is a nudge; you just watched a good one lose. A **hook** is *feedback*: a deterministic check that
+runs and can **refuse** a bad result. It's a guarantee, not a suggestion — and a hook can guard a *design*
+invariant, not just a value.
+
+The seed ships the architecture check at two positions. Same check ("does a domain file import an
+adapter?"), different distance from the mistake — the **position knob**.
+
+| Hook (`seed/.claude/hooks/`) | Event | Speed / consequence |
 |---|---|---|
-| `round-gate-edit.py` | `PostToolUse` on `Edit`/`Write` | **Fast.** Fires the instant `money.py` is saved; agent corrected mid-task, fix is local. The bad code did exist on disk for a moment. |
-| `round-gate-commit.py` | `PreToolUse` on `git commit` | **Late.** Fires only at ship time; nothing bad ever lands, but the mistake may be buried under later work, so the fix costs more. |
+| `architecture-gate-edit.py` | `PostToolUse` on `Edit`/`Write` | **Fast.** Fires the instant a domain file is saved with an adapter import; agent corrected mid-task, fix is local. |
+| `architecture-gate-commit.py` | `PreToolUse` on `git commit` | **Late.** Fires only at ship time; nothing broken lands, but the coupling may be buried under later work, so untangling costs more. |
 
-**When to reach for which loop.** The two loops aren't interchangeable:
+These were **dormant** all morning — while the code was the single `checkout.py` file there was no
+`checkout/` package for them to check. Now that you've refactored, they're live. Try it: add
+`from .adapters.payment import CashPayment` to `checkout/service.py` and save.
 
-- **Feedforward (rules)** — for *contested decisions the model won't guess right*. Rounding
-  direction is one: left alone, a capable agent rounds to nearest (with a float) every time. The
-  rule is what makes it round your way.
-- **Feedback (hooks)** — for *invariants the model must never violate*, whether or not it usually
-  gets them right. A hook is a guarantee; a rule is only a nudge.
+```text
+architecture-gate (edit): checkout/service.py imports a concrete adapter — the domain must depend
+ONLY on ports (checkout/ports.py), never on checkout.adapters.
+```
 
-**Try the variants (optional).** Each swap is one step; undo it when done.
+The bad edit can't survive. **Three things now agree — the rule (feedforward), the code (imitation), and
+the hook (feedback)** — which is exactly the combination the original single-file lab could only gesture at.
 
-- *Weak rule:* replace the rounding line in `CLAUDE.md` with the line from `.claude/rules/cash-vague.md`,
-  restart the agent, and re-run Step 4 prompt 1 — watch the vague rule fail to steer.
-- *Commit gate alone:* delete the `PostToolUse` block from `.claude/settings.json` so only the late
-  gate is wired, then re-run Step 4 prompt 2 — the bad edit now sails through and is caught only at
-  commit. That gap between "caught on save" and "caught at ship" is the cost of a slow loop.
+Reach for feedback on *invariants that must never be violated*, whichever way the agent leans. Reach for
+feedforward on *contested choices the model won't guess right*. A rule without a hook is a suggestion; a
+hook without a rule is a gate no one explained. The design decision you fixed today deserves both.
 
-A rule without a hook is a suggestion; a hook without a rule is a gate no one explained. Together —
-guidance you write, enforcement you run — they're the smallest whole unit of a charter, and the two
-mechanisms to reach for first.
+## Module 6 · Commands — a reusable invocation you trigger *(build-it lab)*
 
-## Think it through — the policy just changed
+A **command** is a saved prompt you invoke by name — the thing you keep typing, written down once. It's
+feedforward you fire on demand, not a rule that's always on. The seed ships two in `seed/.claude/commands/`:
 
-> **Discussion.** The company changes its mind: cash should now always round **up** — the
-> merchant's favor, never the customer's. You want the agent to write round-*up* code from now on.
-> **What has to change?** Talk it out before you read the answer.
+- `/comprehend <file>` — runs the five questions on a target and returns answers, changing nothing.
+- `/check-ports <file>` — audits a file against the architecture rule and reports violations.
 
-The tempting answer is "edit the rule." That is necessary but *not sufficient* — and the gap is the
-whole lesson. Three things describe the rounding policy, and all three have to move together:
+**Try one:** in your AI tool, run `/check-ports checkout.py` (before you refactored) or on a `reference/`
+file (after). It reports the same drift you found by hand — now on demand, in seconds.
 
-1. **The rule (feedforward)** — `CLAUDE.md` and `.claude/rules/cash-concrete.md`. Change "round
-   down, customer's favor" to "round up, merchant's favor":
-   > Rounding policy: cash totals round **UP** to the next nickel (5 cents), in the merchant's favor.
-   > Never round down, and never round to the nearest nickel.
+**Build one (the lab).** A command is just a markdown file: the filename is the command name, and the body
+is the prompt, with `$ARGUMENTS` for what you pass. Create `seed/.claude/commands/prove-drift.md`:
 
-2. **The code (imitation)** — `seed/money.py`. This is the one people forget, and it's the one that
-   matters most. Change the implementation *and* its docstring:
-   ```python
-   def round_cash(total_cents):
-       """Round a cash total UP to the next nickel (5 cents), in the merchant's favor."""
-       return -(-total_cents // 5) * 5    # integer ceil to a nickel
-   ```
+```markdown
+---
+description: Given a file and the charter, write a failing check that proves the drift
+argument-hint: [file]
+---
+Read $ARGUMENTS and the charter (CLAUDE.md). If the code contradicts the architecture rule,
+write the smallest test or grep that FAILS on the current code and would PASS once it complies.
+Show me the check and the command to run it. Do not fix the code.
+```
 
-3. **The hook (feedback)** — both files in `.claude/hooks/`. Flip the check from floor to ceil so it
-   now blocks anything that *doesn't* round up:
-   ```python
-   want = -(-total // 5) * 5      # was: total - (total % 5)
-   if got != want:               # block when the code failed to round up
-   ```
+Run `/prove-drift checkout.py`. You just turned "catch the agent wrong" into a one-word tool.
 
-**Why you still have to change the code — and why the lab can't show it.** At the size of this seed
-the rule is right in front of the agent and the contradiction is glaring, so a capable agent follows
-the rule and even flags the stale code as wrong. (We tested exactly this contradiction on fresh
-agents — rule says up, code says down — and they rounded up every time, one of them explicitly
-calling out the old code as non-compliant.) **The imitation problem is a scale effect.** In a real
-codebase — thousands of lines, the rule one entry in a long charter, round-down rounding repeated
-across dozens of call sites — the *prevailing pattern in the code* becomes the strongest signal the
-agent has, and it copies that pattern past a rule it barely weighs. The lab is too small to reproduce
-this; the takeaway is what it points at.
+| When to reach for a command | When *not* to |
+|---|---|
+| A prompt you type more than twice; a team-standard workflow; onboarding a repeatable check. | A one-off ask; something a rule should enforce always (make it a rule); anything needing enforcement (make it a hook). |
 
-**And it bites hardest at the architecture level.** Rounding direction is a simple, local decision the
-model can derive from the rule alone — which is exactly why the lab agents got it right. The rules
-imitation actually defeats are the *design-level* ones, where most of a charter's rules live: "use
-ports and adapters," "no business logic in controllers," "depend on interfaces, not concretes." There
-is no one-line correct answer to copy; the agent infers "how we do it here" from the surrounding code.
-If most of the codebase ignores the rule, the counterexamples *are* the pattern, and the agent
-replicates them — the more non-compliant code, the stronger the pull. The cost of a rule the code
-contradicts isn't a wrong penny; it's an architecture that drifts further from its own charter with
-every change.
+## Module 7 · Skills — guidance that loads when it's relevant *(build-it lab)*
 
-So changing the code isn't optional:
+A **skill** is like a rule, with one difference that matters at scale: **it loads only when the model
+decides it's relevant**, instead of sitting in context all the time. That's *progressive disclosure* —
+you keep the always-on charter small and let deep guidance appear exactly when the task calls for it.
 
-- **The old code is a real defect.** A rule is a promise about *future* code; it doesn't retroactively
-  fix `round_cash`, which keeps rounding down in production until someone edits it.
-- **At scale, the code is what the agent imitates.** Leave a round-down implementation in the tree and
-  you've planted the pattern the next change copies — the more of it there is, the louder it gets.
+The seed ships `seed/.claude/skills/ports-and-adapters/SKILL.md`: the four-step recipe for adding a
+capability behind a port. Its frontmatter `description` is the trigger — the model reads it and pulls in
+the body when you're doing design work ("add a feature", "refactor", "new adapter").
 
-The **hook removes the gamble** — it blocks any round-down result regardless of what the agent
-weighed, in the lab and at scale alike. But the hook is a backstop. The durable fix is to **make the
-code correct**: when nothing in the tree rounds down, there is no contradictory pattern to imitate and
-no defect left in production. Feedforward, feedback, *and* the code itself have to agree.
+**Feel the difference.** The always-on architecture rule in `CLAUDE.md` costs context on *every* turn,
+even when you're fixing a typo. The skill costs nothing until you touch the design — then it's there with
+the full recipe. Same guidance, paid for only when used.
 
-## The bigger picture — three surfaces, spent sparingly
+**Build one (the lab).** Create `seed/.claude/skills/money-rules/SKILL.md`:
 
-Step back from the pennies. Everything in this session is about the surfaces that bound what an agent
-does. There are three, and you just met all of them:
+```markdown
+---
+name: money-rules
+description: Use when touching money, prices, tax, or totals — loads the integer-cents rules.
+---
+# Money in this repo
+- Money is integer cents (`Money` in money.py). Never construct it from a float.
+- Format to dollars only at the display edge, never mid-calculation.
+- Tax and discounts are integer math in basis points: cents * bps // 10000.
+```
+
+Now ask the agent to "add a 5% senior discount." Watch it pull in `money-rules` because the task is about
+money — without you loading it, and without it cluttering context when you were doing something else.
+
+| Rule (always on) | Skill (on demand) |
+|---|---|
+| Small, universal invariants every change must respect. Costs context every turn. | Deeper, situational recipes. Costs context only when the model judges it relevant — keeps the charter lean. |
+
+## Module 8 · Agents — delegation into a bounded context *(build-it lab)*
+
+An **agent** (subagent) is a *separate* AI context you hand a focused job. It has its own instructions and
+its own tools, does the work without cluttering your main conversation, and returns a result. Use it to
+**isolate** a specialized task, to keep your main context clean, and to run work in **parallel**.
+
+The seed ships `seed/.claude/agents/design-reviewer.md`: a reviewer whose only job is to catch ports-and-
+adapters drift and return a verdict. It reads the charter and the code, cites lines, and reports
+`pass | violations found` — the same judgment you built in Module 1, packaged so you can summon it and
+keep working.
+
+**Try it.** Ask your tool: *"Use the design-reviewer agent to review `checkout.py` against the charter."*
+It runs in its own context and hands back a verdict — your main session never fills up with the review's
+reading.
+
+**Build one (the lab).** Create `seed/.claude/agents/test-gap-finder.md`:
+
+```markdown
+---
+name: test-gap-finder
+description: Finds behavior the tests don't cover. Use before trusting a green suite.
+tools: Read, Grep, Glob
+---
+You find gaps between what the code does and what the tests check. Read the code and the tests.
+List each behavior or input class the suite never exercises, most dangerous first. Do not write
+tests — just name the gaps and why each matters. This is how "green ≠ correct" gets specific.
+```
+
+Point it at `seed/`. It should surface exactly what Module 1 relied on: the suite checks totals, never
+design, and never the discount path.
+
+| Reach for an agent when | Do it inline when |
+|---|---|
+| The task is self-contained and would flood your context (a full review, a broad search); you want a second, independent perspective; you can run several at once. | The task is small and part of your current train of thought; delegation would cost more setup than it saves. |
+
+**Delegation's own trap:** an agent runs on its own comprehension, not yours. You still own the verdict.
+Read what it returns with the same five questions — a confident subagent can be confidently wrong.
+
+### Planning with `/plan`
+
+Before a change with more than a couple of moving parts — the Module 4 refactor is the perfect example —
+reach for a planning step. In Claude Code, `/plan` (the planning skill) breaks work into small, ordered,
+verifiable tasks *before* any code is written, so you approve the shape of the change first and the agent
+executes against a plan you understood. The senior habit isn't "prompt and pray"; it's **plan → verify the
+plan → execute in small steps → check each.** For the refactor, a good plan is literally the five steps in
+Module 4, each with "run pytest" as its check. Plan first when the blast radius is more than one file.
+
+---
+
+## Module 9 · The bigger picture — surfaces and mechanisms
+
+Step back. Everything today was about **bounding what an agent does** and **spending your attention where
+it counts.** Two families, six tools.
+
+**Surfaces that bound behavior** — each narrows the *behavior band* (the range of things the agent might
+do). Reliability is just a tight band.
 
 ```mermaid
 flowchart LR
-    I["Instruction<br/>(charter prose)"] --> A[Agent]
-    C["The code<br/>(imitation)"] --> A
-    F["Feedback<br/>(sensors, gates)"] --> A
+    I["Instruction<br/>(rules, CLAUDE.md — feedforward)"] --> A[Agent]
+    C["The code<br/>(imitation — the loudest signal)"] --> A
+    F["Feedback<br/>(hooks, tests)"] --> A
     A --> B["Behavior band<br/>(how tight = reliability)"]
 ```
 
-- **Instruction** — the charter prose the agent reads: rules, `CLAUDE.md`. This is feedforward.
-- **The code** — what already exists in the repo, which the agent imitates. The surface juniors
-  forget, and the one that dominates at scale.
-- **Feedback** — the sensors and gates that check the result: tests, hooks. This is feedback.
+**Mechanisms that direct and package work** — how you get the right instruction, and the right attention,
+to the right place without paying for it everywhere:
 
-Each surface narrows the **behavior band** — the range of things the agent might do. Reliability is
-just a tight band. Add a surface and the band gets narrower.
+| Mechanism | The question it answers | Kind | Reach for it when |
+|---|---|---|---|
+| **Rule / CLAUDE.md** | What should always be true? | Feedforward, always on | Small universal invariants; contested defaults the model won't guess right. |
+| **Command** | What do I ask for repeatedly? | Feedforward, you trigger | A prompt you type more than twice; a team-standard workflow. |
+| **Skill** | What expertise should load *when relevant*? | Feedforward, model triggers | Deep situational recipes you don't want in context every turn. |
+| **Hook** | What must *never* slip through? | Feedback, deterministic | Invariants that must hold regardless of how the agent leans. |
+| **Agent** | What should run in its own bounded context? | Delegation / structure | Self-contained work that would flood context, or wants an independent perspective. |
+| **The code** | What example will the next change imitate? | Substrate | Always. Keep it matching the charter — it is the loudest instruction you have. |
 
-Here's the honest part: **this lab is a toy.** A two-line `round_cash` does not deserve a rule and
-two hooks — in real life you'd read it once and move on; you would never gate something this small.
-Every rule and hook costs effort to write and, worse, to keep true as the code changes. So the goal
-is never *the most* constraints. It's **the fewest constraints that buy a tight-enough band** — you
-add one only when something real needs it: money, security, data integrity, a policy with legal or
-financial weight.
+The honest part, same as ever: **the goal is never the most constraints — it's the fewest that buy a
+tight-enough band.** Every rule, hook, command, skill, and agent costs effort to write and to keep true.
+Spend them on what carries risk: money, security, data integrity, and the **design decisions that drift**,
+like the one you fixed today. Knowing *when not* to reach for a mechanism is as much the senior's job as
+knowing how — and the code surface is free and always on, so keeping it honest is the highest-leverage move
+of all.
 
-Where does that pay for itself? Not here — in a production app. Many files, many tests, many policies
-and requirements, many contributors, an agent making changes all day. There the code surface is huge,
-no human reads every diff, and comprehension alone can't scale. A few well-placed rules and hooks on
-the things that actually carry risk keep the band tight when nothing else can. That is when the two
-mechanisms you practiced today earn their cost — and knowing *when not* to reach for them is as much
-the senior's job as knowing how.
+---
 
-## What you leave with
+## Module 10 · Mindset, strategies, and pairing with a senior
+
+The tools were the morning. This is the part that actually makes you senior.
+
+### The role hasn't changed — it just got clearer
+
+**Your job was never to type code. It was to solve business problems with software.** The agent removes
+most of the typing, which strips away the disguise: what's left is the actual work — understanding the
+problem, deciding what "correct" means, choosing a design that will survive change, and knowing when the
+plausible answer in front of you is wrong. That was always the job. Now it's the *whole* job.
+
+**And you own what the agent produces.** A diff the agent wrote and you merged is *your* change — your name
+is on it, your service pages at 3 a.m. because of it, your customer is overcharged by it. Ownership does not
+transfer to the tool. "The agent wrote it" is not a defense; it's a description of how you failed to read it.
+The comprehension card is how you earn the right to own it.
+
+### Mindset shifts (junior → senior in the age of AI)
+
+- **From producing code to producing judgment.** The agent supplies code; you supply the decision that it's right.
+- **From "green = done" to "green = the tests that exist passed."** And green says *nothing* about design.
+- **From reading the diff to explaining the diff.** Comprehension is active — out loud, in your own words.
+- **From "ask the senior for everything" to "ask the agent the *what*, save the senior for the *why*."**
+  The agent is the always-available tutor for what-is-this / where-does-it-go. The senior is for taste,
+  tradeoffs, and the things not written down anywhere.
+- **From typing speed to context management.** Seniority is now partly harness sense: what to load, what to
+  gate, what to delegate, when to `/clear` and start fresh.
+- **From trusting the abstraction to owning the design.** The agent imitates whatever's in the tree. Keeping
+  the code matching its charter is now a first-class engineering task, not cleanup.
+
+### Strategies that carry the reps
+
+- **Characterize before you change.** Pin current behavior in a test first; then you can move fast safely.
+- **Predict the failure before you run it.** Say how you expect it to break. Being wrong is the lesson.
+- **Make it boring.** Rewrite the clever version as the one you'd rather debug at 3 a.m.
+- **Catch the agent wrong every week,** on any codebase you touch. The habit is the deliverable, not any one catch.
+- **Spend constraints sparingly.** Add a rule or hook only when something real needs it. Fewest that buy the band.
+- **Keep the code honest.** It's the loudest instruction. A charter the code contradicts is already lost.
+- **Plan before multi-file changes.** `/plan`, approve the shape, execute in small verified steps.
+
+### Pairing with a senior — how to get ten times the value
+
+- **Bring a filled card, not a blank stare.** Run the five questions first; bring the *one* you couldn't answer.
+- **Ask for the why that isn't written down.** Your confusion is usually the charter's missing onboarding, not
+  a gap in you. Every "why is it like this?" you resolve should become a rule, a doc, or a comment.
+- **Pair on the catch.** Show a senior a diff you think is plausible-but-wrong (or drifted) and your failing
+  check. Watch how they reason about it — that reasoning is the thing you can't download.
+- **Watch what they *don't* do.** When a senior *declines* to add a rule or a hook, ask why. Knowing when not
+  to constrain is the skill that separates senior from thorough.
+- **Rotate the driver and make them narrate.** A senior thinking out loud is the highest-bandwidth teaching
+  there is. Ask them to say the quiet judgment parts.
+
+---
+
+## Open Q&A and wrap
+
+Close the day with open questions — the ones the lab surfaced and the ones from your own work. Good prompts
+to seed it: *Where in our codebase is the charter and code already drifting? Which of our green suites are
+lying about design? What's the one rule or hook worth writing Monday — and the ten that aren't?*
+
+### What you leave with
 
 - The comprehension card — the daily rule, the five questions, the five moves.
-- A filled card applied to a real agent diff.
-- A test you wrote that catches the planted overcharge.
-- A working mental model: three surfaces bound an agent — the rule you write (instruction), the code
-  it imitates, and the hook that checks it (feedback) — and reliability is just a tight behavior band.
+- A drift you found by reading code against its charter.
+- **A hexagonal refactor you did by hand** — the drifted service turned into ports and adapters.
+- One of each mechanism you built and ran: a rule, a hook, a command, a skill, an agent.
+- A working mental model: three surfaces bound an agent (instruction, code, feedback) and six mechanisms
+  direct the work — and reliability is just a tight behavior band, bought with the fewest constraints that work.
+- The point under all of it: your job is to solve business problems and to own the change, agent-written or not.
 
 ---
 
 # After the workshop — the take-home lab
 
-The session gives you the card and one rep on a toy repo. Judgment comes from reps on real code you
-didn't write. This lab is yours to run afterward — no instructor, no answer key. Do it on a project
-you'll never ship to, so you can be wrong for free.
+The session gives you the card and one full rep on a seed. Judgment comes from reps on real code you didn't
+write. Do this on a project you'll never ship to, so you can be wrong for free.
 
-**Why an open-source project.** A toy seed can't teach you scale, history, or the weight of code
-other people depend on. A real project can: it's readable at your own pace, its commit history
-records why every line is the way it is, and its test suite shows what "proven correct" actually
-looks like. The five questions and five moves are the same; only the code got real.
+**Why an open-source project.** A seed can't teach you scale, history, or the weight of code others depend on.
+A real project can: readable at your own pace, its commit history records why every line is the way it is, and
+its test suite shows what "proven correct" looks like. The card is the same; only the code got real.
 
-**Why SQLite is the one to start on.**
-- **Small enough to hold.** One file's worth of public API, navigable in an afternoon.
-- **Famous for its tests.** It ships far more test code than library code, and documents *how* it's
-  tested — the discipline this workshop trains, at professional scale.
-  ([sqlite.org/testing.html](https://www.sqlite.org/testing.html))
-- **The docs explain the *why*** — which is question 3 on your card, answered for you.
-- **Self-contained C.** Legible and dependency-free; you see exactly where a change enters and
-  leaves.
-
-Source and docs: [sqlite.org](https://www.sqlite.org/) · source at
-[sqlite.org/src](https://www.sqlite.org/src/) · a readable mirror lives on GitHub.
+**Why SQLite to start.** Small enough to hold; famous for its tests (far more test code than library code,
+and it documents *how* — [sqlite.org/testing.html](https://www.sqlite.org/testing.html)); the docs explain
+the *why* (question 3, answered for you); self-contained C you can trace end to end.
+Source and docs: [sqlite.org](https://www.sqlite.org/) · source at [sqlite.org/src](https://www.sqlite.org/src/).
 
 **Run the card on real code:**
-1. **Read one design doc, explain it back.** Pick a page from the SQLite docs, read it, then explain
-   it to your agent in your own words. Where you stall is where you didn't understand.
-2. **Comprehension pass.** Choose one self-contained function. Run all five questions against it.
-   Use the agent as a tutor — ask *what*, *where*, *why* — but form your own answer first.
-3. **Predict the failure (move 4).** Pick one test. Before reading it, predict what input would
-   break the code it guards. Then read the test. Were you right?
-4. **Catch the agent wrong (move 5).** Ask your agent to "simplify" or "optimize" one small
-   function. Run the five questions on its diff. Prove it correct, or prove it wrong with a test.
-5. **Legibility read (move 3).** Find the best-named and worst-named thing you can. Ask why the good
-   one is good. That instinct is what you're building.
+1. **Read one design doc, explain it back** to your agent in your own words. Where you stall is where you didn't understand.
+2. **Comprehension pass.** One self-contained function, all five questions. Use the agent as a tutor — but form your own answer first.
+3. **Predict the failure (move 4).** Pick a test; predict the breaking input before reading it. Were you right?
+4. **Catch the agent wrong (move 5).** Ask it to "simplify" one function; run the five questions on the diff; prove it right or wrong with a test.
+5. **Spot the drift.** Find a place where a stated convention and the code disagree. That instinct is what you built today.
 
-**Repeat step 4 weekly** on any codebase you touch. The habit is the deliverable, not any one catch.
+**Repeat step 4 weekly** on any codebase you touch.
 
 ---
 
@@ -354,107 +488,58 @@ Source and docs: [sqlite.org](https://www.sqlite.org/) · source at
 
 ## Running the session
 
-| Length | Shape | Deliverable |
-|---|---|---|
-| **90 min** | Talk + one live lab + discussion | The comprehension card, applied once to a real agent diff |
+The day is an arc: **read the drift (M1) → watch it compound (M2) → fix it (M4) → lock it in (M5) → learn
+the rest of the toolkit (M6–M8) → step back (M9–M10).** M4 is the emotional peak — the moment a learner turns
+tangled code into a clean hexagon by hand and re-runs the agent to see it now do the right thing. Protect it.
 
-The whole lab runs live in 90 minutes — talk, Steps 1–4, the two knobs, and the "policy just changed"
-discussion, which is where the senior-level insight lands. This works only if everyone's `pytest`
-**and** Claude Code are green *before* the session; pre-flight is non-negotiable.
+- **Pre-flight is non-negotiable.** Put the *Before you start* block in the invite and on the opening slide.
+  `pytest` **and** the AI tool must be green before the room starts. Anyone red pairs with someone green.
+- **Cut talk before lab.** If you run long, shrink M9 and the talk; never M1/M2/M4.
+- **Protect the discovery.** Don't pre-spoil "green ≠ design." Let M1 land it and M2 sting.
+- **Regroup on the compound.** After M2, surface out loud: *the agent had the rule and still copied the code.*
+  That's the scale lesson; say it plainly.
+- **Lunch splits M3/M4** on purpose — people come back to the payoff, not the setup.
 
-**Agenda:**
+## The frame — the talk
 
-| Clock | Min | Segment |
-|---|---|---|
-| 0:00 | 5 | Welcome; confirm everyone is green (pre-flight done ahead of time) |
-| 0:05 | 15 | Talk — the frame, the key ideas, the "a diff I couldn't explain" anecdote |
-| 0:20 | 3 | Step 1 — baseline & spring the trap |
-| 0:23 | 14 | Step 2 — the five questions, in pairs |
-| 0:37 | 12 | Step 3 — prove it wrong (write the failing test) |
-| 0:49 | 12 | Step 4 — the rule + the hook (two prompts) |
-| 1:01 | 10 | How it works — the two knobs (walk the tradeoffs; try one variant) |
-| 1:11 | 12 | Think it through — "the policy just changed" (pairs, then share) |
-| 1:23 | 7 | The bigger picture + wrap (what you leave with) |
+Open with the split: **does it execute, or is it read?** The machinery executes (agent, loop, tools); the
+charter is read (CLAUDE.md, rules, gates, skills). Comprehension is the attendee's job because the agent
+produces the code but not the judgment that it's right. Then the day's thesis, said once, out loud:
 
-Tight on time? The safe cuts, in order: the two knobs → the bigger picture → shrink the talk. Never
-cut Steps 1–4 or the wrap — they're the rep and the payoff. Anything cut becomes take-home.
+> The failure that scales isn't a wrong penny — it's **design drift**. The charter says one thing, the code
+> does another, and the agent imitates the code. A rule the code contradicts is already lost. The senior move
+> is to make the code agree with the charter, then gate it so it can't drift again.
 
-- **Cut talk before you cut lab.** If you run long, shrink the talk; never the lab.
-- **Pre-flight matters.** Put the *Before you start* block in the calendar invite and on the opening
-  slide. A failed `pip install` — or a missing Claude Code — in minute two costs someone the lab.
-  Step 4 needs Claude Code working on the seed for everyone; confirm it ahead, not in the room.
-  Anyone red at the start pairs with someone green.
-- **Protect the "I almost shipped that" moment.** Step 1's trap and Step 3's red test are the
-  emotional core. Don't spoil that green ≠ correct — let the room discover it.
-- **Regroup on the catch.** Who spotted the overcharge? Surface the near-miss out loud; it's the
-  point of the whole session.
+## Why design drift, not a value bug
 
-## The talk — the frame and the spine
+An earlier seed used a value-level trap (cash rounding the wrong way). It demoed *behavioral* slop well, but
+rounding direction is a local decision an agent derives from a rule alone — too easy, and a good rule fixes it
+outright. Design drift is the harder, truer failure: there's no one-line answer to copy, so the surrounding
+code becomes the strongest signal, and a rule alone loses to it (Module 2 shows this live). That's why the
+rule **and** hook here guard an architecture decision, and why the payoff is a refactor, not a one-line fix.
 
-Open with the split that organizes everything around the agent: **does it execute, or is it read?**
-The machinery executes (the agent, the loop, the tools); the charter is read (the `CLAUDE.md`, the
-rules, the gates). Comprehension is the attendee's job because the agent can produce the code but not
-the judgment that it's right. — *ch04–06, Appendix E.*
+## The mechanics you may need to drive live
 
-Keep it a talk, not a lecture: ask the room for a time they merged a diff they couldn't explain, and
-what it cost. That story is the whole workshop in one anecdote.
-
-**Key ideas to land** (from Appendix E — say these out loud; they're the spine):
-
-> - The agent changes what it means to be *junior* more than what it means to be *senior*. A senior
->   already has the judgment the tool can't supply; a junior is building it at the exact moment the
->   tool offers to skip it.
-> - A senior is not the engineer who types less. A senior is the engineer who understands enough to
->   know when the agent is wrong — and you only get there by asking.
-> - Make comprehension the requirement, not the option. Use the agent to *explain*, never to *skip*.
-> - A green pipeline is permission to proceed. A red one is the system teaching you something before
->   a human had to.
-> - The arrangement is two-sided: **you bring comprehension; the team keeps the charter good enough
->   to onboard you and the harness good enough to guard you.** A junior's confusion is usually the
->   charter's missing onboarding, not a gap in the junior.
-> - The day you can reliably catch a confident, fluent, wrong answer is the day you are no longer
->   junior.
-
-## Why cash rounding, and why feedforward is the hard half to demo
-
-This seed's case was chosen from a real experiment, and the result shapes how you should teach it:
-
-- **Conservation doesn't steer.** An earlier seed used a money-conservation invariant (shares must
-  sum to the total). Across many fresh-agent trials, the agent conserved money **every time, with or
-  without the rule** — a capable model distributes remainder cents by default. A conservation *rule*
-  is invisible; only a *hook* proves anything. Good feedback demo, useless feedforward demo.
-- **Rounding direction does steer.** Asked to round a cash total to a nickel, fresh agents rounded to
-  the **nearest** nickel (with a `float`) unanimously with no rule; add "round down, customer's
-  favor" and they switched to an **integer round-down** unanimously. The two differ on ~40% of
-  totals. That is a rule visibly changing behavior — and it happens to fix the float too.
-
-The lesson to land in Step 4: **use feedforward for contested choices the model won't guess right,
-and feedback for invariants it must never violate.** If a live prompt-1 ever shows the agent already
-rounding down without the rule, that's the teaching moment, not a failure — say so and move to the
-hook.
+- **M2 offline fallback:** `git apply patches/agent-adds-discount.diff` shows the imitative drift without a
+  live agent; suite stays green. `git apply -R` to reset.
+- **The hooks are dormant pre-refactor** by design (there's no `checkout/` package yet). They wake after M4.
+  To demo firing: after refactor, add `from .adapters.payment import CashPayment` to `checkout/service.py`.
+- **`reference/`** is the M4 answer key and runs its own suite (`cd reference && pytest` → 9 passed). Point
+  stuck learners there, but have them attempt each step first.
+- **Rule specificity (M3):** swap `architecture-vague.md` into `CLAUDE.md`, restart the agent, re-run M2's
+  prompt to show the vague rule failing to steer.
 
 ## Mixed room
 
-Pair a stronger engineer with a newer one for the lab. Let the stretch in Step 3 and the variants in
-*How it works* absorb fast finishers so you never pace to the ceiling.
+Pair a stronger engineer with a newer one. Let M4's stretch (do the refactor without peeking at `reference/`)
+and the build-it labs in M6–M8 absorb fast finishers so you never pace to the ceiling.
 
 ## References
 
-- **The seed's design** is documented in [`seed/README.md`](./seed/README.md): why the shipped suite
-  is deliberately incomplete, what each file does, and the full flow.
-- `seed/patches/plausible-but-wrong.diff` — the plant (nearest nickel, via float).
-- `seed/patches/gate-test.diff` — the rounding gate as a test, for reference.
-- **Book map.** Appendix E ("For the Junior Engineer") is the spine. Foundations ch01–07 (the split,
-  the reliability problem, the repo as a behavioral system); ch14 (the legible codebase); ch15 (tests
-  and gates).
-
-## To refine (working notes)
-
-- [ ] Time-box each lab step against a real run; adjust the pacing table.
-- [ ] Decide whether to demo the *variants* live or leave them as take-home.
-- [ ] Step 4 demos the *edit* gate live; the commit gate is only mentioned. To show it firing, apply
-      the plant in the shell and ask the agent to commit (both hooks are on, so the edit gate would
-      otherwise catch it first).
-- [ ] Step 4 prompt 1 *states* the no-rule behavior (rounds to nearest) rather than toggling it live,
-      to keep the pace up. To demo the toggle live, comment the rounding rule out of `CLAUDE.md` and
-      restart the session so it reloads — budget a few extra minutes.
+- **The seed's design** is documented in [`seed/README.md`](./seed/README.md): the two states (drifted vs
+  clean), what each file does, and the flow.
+- `seed/reference/` — the ports-and-adapters answer key.
+- `seed/patches/agent-adds-discount.diff` — the imitative-drift demo.
+- **Book map.** Appendix E ("For the Junior Engineer") is the spine. Foundations ch01–07 (the split, the
+  reliability problem, the repo as a behavioral system); ch11–11b (files that govern); ch14 (the legible
+  codebase); ch15/ch18 (tests, gates, catching the agent wrong).

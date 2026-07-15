@@ -1,64 +1,76 @@
-# Seed repo — Junior to Senior
+# Seed repo — Junior to Senior (full day)
 
-A tiny cash-register service small enough to hold in your head: it settles a bill for cash and
-prints a receipt. Pennies are discontinued, so cash totals round to a nickel — and **which way they
-round** is the load-bearing decision. The charter's policy is *round down, in the customer's favor*:
-they never pay more than the marked total. That single policy is what punishes plausible-but-wrong
-changes.
+A small cash-register service: it settles a bill and prints a receipt. The load-bearing fact
+about this repo is a **deliberate disagreement between the charter and the code**: `CLAUDE.md`
+states a good *ports-and-adapters* rule, and the shipped code (`checkout.py`) ignores it, tangling
+pricing, tax, payment, and receipt-printing into one class. Everything works and the tests pass.
+That gap is the whole workshop: a rule the code contradicts is a rule the agent will contradict
+too, because the code is the example it imitates.
+
+## The two states of this repo
+
+| | Where | What it is |
+|---|---|---|
+| **Drifted (shipped)** | top level — `checkout.py`, `money.py`, `main.py`, `tests/` | The service as it really shipped: one tangled class. Green suite, no ports. |
+| **Clean (answer key)** | `reference/` | The same service built as ports and adapters — the target of the refactor lab. Its own green suite. |
+
+The lab reads the drift, watches an agent deepen it, then **refactors the drifted code into the
+hexagon** — turning the top level into something that matches `reference/`.
 
 ## Files
 
-- `money.py` — `round_cash(total_cents)`. Correct: rounds **down** to a nickel (customer's favor),
-  `total_cents - (total_cents % 5)`. Money is integer cents.
-- `app.py` — turns a bill into a receipt: the marked total and the cash total. The cash line is
-  where a wrong rounding policy shows up as a real overcharge.
-- `test_money.py` — the suite that ships with the repo. **Deliberately incomplete:** the tests use
-  only totals that round the same way down or to nearest, so rounding direction never shows and both
-  the correct floor and the plant pass. Green here means "the tests that exist passed," not "correct."
-- `CLAUDE.md` — starter charter; learners author the cash-rounding rule.
-- `patches/plausible-but-wrong.diff` — the agent's "simplification": rounds to the *nearest* nickel
-  with a `float` (`round(total / 5) * 5`) — the textbook cash-rounding scheme. Looks cleaner, passes
-  the shipped suite, and quietly overcharges the customer up to four cents. The spine of the lab.
-- `patches/gate-test.diff` — reference: the rounding gate that catches the plant
-  (`test_cash_never_rounds_up`).
-- `.claude/rules/cash-vague.md`, `.claude/rules/cash-concrete.md` — the *feedforward* half of the
-  charter, in two strengths. The vague rule barely steers; the concrete one flips the agent from
-  nearest-nickel-with-a-float to integer round-down. Same rule, different specificity.
-- `.claude/settings.json` + `.claude/hooks/round-gate-edit.py` + `.claude/hooks/round-gate-commit.py`
-  — the *feedback* half, wired at two positions. The edit gate (`PostToolUse`) catches cash that
-  rounds against the customer the instant it's written; the commit gate (`PreToolUse` on
-  `git commit`) blocks it at ship time. Same check, different distance from the mistake.
+- `checkout.py` — the drifted service. One `CheckoutService.checkout` does the catalog lookup, the
+  tax, the cash/card branch, and the receipt printing. Contradicts the charter's architecture rule.
+- `money.py` — `Money`, integer cents, rejects floats. Used by both states.
+- `main.py`, `tests/` — run the drifted service; the suite checks **behavior only**, so design
+  drift is invisible to it. Green means "the tests that exist passed," not "the code matches the charter."
+- `reference/` — the clean ports-and-adapters build: `checkout/ports.py` (the `PricingProvider`,
+  `PaymentMethod`, `ReceiptSink` Protocols), `checkout/service.py` (depends only on ports),
+  `checkout/adapters/` (the concretes), `main.py` (the composition root that wires them). The answer key.
+- `patches/agent-adds-discount.diff` — what an agent hands you when asked to "add a member discount
+  using ports and adapters" against the *drifted* code: more inline coupling, no port. Passes the suite.
+- `CLAUDE.md` — the charter, stating the good ports-and-adapters rule the code drifted from.
+- `.claude/rules/architecture-vague.md`, `architecture-concrete.md` — the **feedforward** half, in
+  two strengths. Same rule, different specificity: the specificity knob.
+- `.claude/hooks/architecture-gate-edit.py`, `architecture-gate-commit.py` — the **feedback** half,
+  at two positions. Same design check (domain must not import an adapter), edit-time vs commit-time:
+  the position knob. Dormant while the code is the tangled `checkout.py`; they wake once the refactor
+  creates the `checkout/` package.
+- `.claude/settings.json` — wires the two hooks.
+- `.claude/commands/comprehend.md`, `check-ports.md` — **commands**: reusable invocations you trigger.
+- `.claude/skills/ports-and-adapters/SKILL.md` — a **skill**: on-demand guidance that loads only when
+  the agent is changing the design (progressive disclosure — the contrast with an always-on rule).
+- `.claude/agents/design-reviewer.md` — an **agent**: a bounded sub-context that reviews a diff for
+  design drift and returns a verdict.
 
 ## The flow
 
 ```bash
 pip install pytest
-pytest                                    # 3 passed
-python app.py                             # cash total $10.80  ← rounded down, customer's favor
+pytest                                   # 5 passed — the drifted code is green
+python main.py                           # cash $11.70 (rounded down), card $11.73
 
-git apply patches/plausible-but-wrong.diff
-pytest                                    # still 3 passed — the trap
-python app.py                             # cash total $10.85  ← a nickel overcharged
+git apply patches/agent-adds-discount.diff
+pytest                                   # still green — the agent's inline discount passes the suite
+python main.py                           # works; the design is worse; the tests never noticed
+git apply -R patches/agent-adds-discount.diff
 
-git apply patches/gate-test.diff          # the gate learners write in the lab
-pytest                                    # FAILS: assert 1085 == 1080
+cd reference && pytest                   # 9 passed — the clean hexagon, the target of the refactor
 ```
 
-With the plant applied, ask your agent to commit. The commit gate refuses:
+Once the refactor turns the top level into a `checkout/` package, the two hooks stop being dormant.
+Add `from .adapters.payment import CashPayment` to `checkout/service.py` and the edit gate fires:
 
 ```text
-round-gate (commit): BLOCKED. round_cash(1083) = 1085, but the customer's-favor amount is 1080 — cash rounded against the customer.
+architecture-gate (edit): checkout/service.py imports a concrete adapter — the domain must depend
+ONLY on ports (checkout/ports.py), never on checkout.adapters.
 ```
 
-The rule tells the agent to round cash down; the hook makes it impossible to ship a version that
-doesn't. See the main README's coda for the feedforward/feedback framing and the tradeoffs between
-the two rule and two hook variants.
+## Why the disagreement is the point
 
-## Why cash rounding (a note on what steers an agent)
-
-An earlier version of this seed used a money-*conservation* invariant. It was dropped because a
-capable model conserves money by default — so a conservation *rule* changes nothing you can observe.
-Cash-rounding *direction* is different: it is a genuinely contested policy (round to nearest? down?),
-so the model's default (nearest nickel, with a float) differs from the charter's choice (integer
-round-down), and the rule visibly steers. That contrast is the point: use feedforward rules for
-decisions the model won't guess right, and feedback hooks for the invariants it must never violate.
+An earlier version of this seed used a value-level trap (cash rounding the wrong way). It was a
+good demo of *behavioral* slop, but rounding direction is a local decision the model derives from a
+rule alone — too easy. The failure that actually scales is **design drift**: the charter says "ports
+and adapters," the code doesn't, and the agent imitates the code. There is no one-line answer to
+copy, so the surrounding code becomes the strongest signal. This seed reproduces that on purpose,
+and the fix is the senior move — make the code agree with the charter, then gate it so it can't drift again.
